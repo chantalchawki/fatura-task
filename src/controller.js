@@ -33,7 +33,7 @@ router.post("/products", (req, res) => {
 
 router.get("/categories/:id/products", (req, res) => {
   const { id } = req.params;
-  const { page } = req.query;
+  const { limit, skip } = req.query;
   database
     .raw(
       `SELECT 
@@ -44,19 +44,18 @@ router.get("/categories/:id/products", (req, res) => {
         provider.name as provider_name,
         category.id as category_id
         from product
-    JOIN (
-	    SELECT * from product_provider
-	    WHERE price in (
-		SELECT MIN(price) from product_provider
-		GROUP BY product_id
-    )
-    )
-    AS lowest_price ON product.id = lowest_price.product_id
-    JOIN provider ON provider.id = lowest_price.provider_id
-    JOIN category ON category.id = product.category_id
-    WHERE category_id = ? 
-    LIMIT ?,25`,
-      [id, page * 25]
+      JOIN (
+	      SELECT * from product_provider
+	      WHERE price in (
+          SELECT MIN(price) from product_provider
+          GROUP BY product_id
+        )
+      ) AS lowest_price ON product.id = lowest_price.product_id
+      JOIN provider ON provider.id = lowest_price.provider_id
+      JOIN category ON category.id = product.category_id
+      WHERE category_id = ? 
+      LIMIT ?,?`,
+      [id, skip, limit]
     )
     .then((result) => {
       res.status(200).json(result);
