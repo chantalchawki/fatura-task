@@ -63,7 +63,7 @@ router.get("/categories/:id/products", (req, res) => {
     });
 });
 
-router.patch("/products/:id/feature", (req, res) => {
+router.patch("/products/:id/toggle", (req, res) => {
   const { id } = req.params;
   database
     .raw(
